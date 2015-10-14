@@ -1,0 +1,21 @@
+provider "cobbler" {
+  url      = "http://127.0.0.1/cobbler_api"
+  username = "cobbler"
+  password = "cobbler"
+}
+
+resource "cobbler_system" "test01" {
+  profile     = "centos7-x86_64"
+  name        = "test01"
+  hostname    = "deathstar"
+  gateway     = "192.168.56.1"
+  nameservers = "8.8.8.8,8.8.4.4"
+
+  network {
+    mac     = "01:02:03:04:05:06"
+    ip      = "192.168.56.173"
+    netmask = "255.255.255.0"
+    dnsname = "deathstar.local"
+    static  = true
+  }
+}

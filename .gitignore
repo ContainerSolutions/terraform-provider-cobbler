@@ -1,0 +1,9 @@
+# Ignore dist file
+terraform-provider-cobbler
+
+# Ignore Terraform's state files
+*.tfstate
+*.tfstate.backup
+
+# Ignore Terraform's config file. There is an example file in the repo for reference.
+config.tf
