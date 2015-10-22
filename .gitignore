@@ -1,5 +1,6 @@
-# Ignore dist file
+# Ignore dist files
 terraform-provider-cobbler
+/dist/
 
 # Ignore Terraform's state files
 *.tfstate
