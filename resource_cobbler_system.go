@@ -126,5 +126,33 @@ func resourceCobblerSystemUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceCobblerSystemDelete(d *schema.ResourceData, meta interface{}) error {
+  var returnValue bool
+
+  //create client
+	client := meta.(*cobbler.Client)
+	ok, err := client.Login()
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return errors.New("Invalid Cobbler credentials")
+	}
+
+  // get name of system
+  name := d.Get("name").(string)
+
+  //delete
+  returnValue, err = client.DeleteSystem(name)
+  if err != nil {
+    return err
+  }
+
+  if !returnValue {
+    return errors.New("Delete System failed.")
+  }
+
+  // tell Terraform that the resource has been deleted
+  d.SetId("")
 	return nil
 }
