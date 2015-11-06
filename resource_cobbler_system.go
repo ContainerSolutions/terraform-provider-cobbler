@@ -2,9 +2,15 @@ package main
 
 import (
 	"errors"
+  "time"
 
 	cobbler "github.com/ContainerSolutions/cobblerclient"
 	"github.com/hashicorp/terraform/helper/schema"
+)
+
+var (
+  tts time.Time       // Time to Sync
+  syncCheckpoint bool
 )
 
 func resourceCobblerSystem() *schema.Resource {
@@ -68,17 +74,6 @@ func resourceCobblerSystem() *schema.Resource {
 }
 
 func resourceCobblerSystemCreate(d *schema.ResourceData, meta interface{}) error {
-	/*
-	   Things to implement:
-	   - login
-	   - get variables from configuration
-	   - get mac address from ucs
-	   - login
-	   - create system
-	   - save system
-	   - sync system
-	   - log out?
-	*/
 
 	client := meta.(*cobbler.Client)
 	ok, err := client.Login()
@@ -106,6 +101,17 @@ func resourceCobblerSystemCreate(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
+
+  tts = time.Now().Add(time.Second)
+
+  // This block runs only once. 
+  // check sync method's comment.
+  if !syncCheckpoint {
+    syncCheckpoint = true
+    channel := make(chan bool)
+    go sync(channel, client)
+    <-channel
+  }
 
 	if !ok {
 		return errors.New("Something went wrong creating the system. Please try again.")
@@ -156,3 +162,23 @@ func resourceCobblerSystemDelete(d *schema.ResourceData, meta interface{}) error
   d.SetId("")
 	return nil
 }
+
+// Every time a system is created in Cobbler, the sync method must be called. 
+// See the following links for more information
+// https://cobbler.github.io/manuals/2.6.0/3/2/2_-_Sync.html
+// https://fedorahosted.org/cobbler/wiki/CobblerXmlrpc#Anexamplehowtoaddanewhost
+// We only want to call sync once after all systems have been created. 
+// Calling sync every time after we create a system causes errors.
+// See also https://github.com/cobbler/cobbler/issues/1570
+func sync(channel chan bool, client *cobbler.Client) {
+  // Block until we reach the time to sync
+  for {
+    if time.Now().UnixNano() > tts.UnixNano() {
+      break
+    }
+  }
+
+  client.Sync()
+  channel<-true
+}
+
