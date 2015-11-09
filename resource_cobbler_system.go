@@ -2,15 +2,15 @@ package main
 
 import (
 	"errors"
-  "time"
+	"time"
 
 	cobbler "github.com/ContainerSolutions/cobblerclient"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
 var (
-  tts time.Time       // Time to Sync
-  syncCheckpoint bool
+	tts            time.Time // Time to Sync
+	syncCheckpoint bool
 )
 
 func resourceCobblerSystem() *schema.Resource {
@@ -89,8 +89,8 @@ func resourceCobblerSystemCreate(d *schema.ResourceData, meta interface{}) error
 	sysConfig := cobbler.SystemConfig{
 		Name:     d.Get("name").(string),
 		Profile:  d.Get("profile").(string),
-    Hostname: d.Get("hostname").(string),
-		Network:  cobbler.NetworkConfig{
+		Hostname: d.Get("hostname").(string),
+		Network: cobbler.NetworkConfig{
 			Mac:     network["mac"].(string),
 			Ip:      network["ip"].(string),
 			DNSName: network["dnsname"].(string),
@@ -102,16 +102,16 @@ func resourceCobblerSystemCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-  tts = time.Now().Add(time.Second)
+	tts = time.Now().Add(time.Second)
 
-  // This block runs only once. 
-  // check sync method's comment.
-  if !syncCheckpoint {
-    syncCheckpoint = true
-    channel := make(chan bool)
-    go sync(channel, client)
-    <-channel
-  }
+	// This block runs only once.
+	// check sync method's comment.
+	if !syncCheckpoint {
+		syncCheckpoint = true
+		channel := make(chan bool)
+		go sync(channel, client)
+		<-channel
+	}
 
 	if !ok {
 		return errors.New("Something went wrong creating the system. Please try again.")
@@ -132,9 +132,9 @@ func resourceCobblerSystemUpdate(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceCobblerSystemDelete(d *schema.ResourceData, meta interface{}) error {
-  var returnValue bool
+	var returnValue bool
 
-  //create client
+	//create client
 	client := meta.(*cobbler.Client)
 	ok, err := client.Login()
 	if err != nil {
@@ -145,40 +145,39 @@ func resourceCobblerSystemDelete(d *schema.ResourceData, meta interface{}) error
 		return errors.New("Invalid Cobbler credentials")
 	}
 
-  // get name of system
-  name := d.Get("name").(string)
+	// get name of system
+	name := d.Get("name").(string)
 
-  //delete
-  returnValue, err = client.DeleteSystem(name)
-  if err != nil {
-    return err
-  }
+	//delete
+	returnValue, err = client.DeleteSystem(name)
+	if err != nil {
+		return err
+	}
 
-  if !returnValue {
-    return errors.New("Delete System failed.")
-  }
+	if !returnValue {
+		return errors.New("Delete System failed.")
+	}
 
-  // tell Terraform that the resource has been deleted
-  d.SetId("")
+	// tell Terraform that the resource has been deleted
+	d.SetId("")
 	return nil
 }
 
-// Every time a system is created in Cobbler, the sync method must be called. 
+// Every time a system is created in Cobbler, the sync method must be called.
 // See the following links for more information
 // https://cobbler.github.io/manuals/2.6.0/3/2/2_-_Sync.html
 // https://fedorahosted.org/cobbler/wiki/CobblerXmlrpc#Anexamplehowtoaddanewhost
-// We only want to call sync once after all systems have been created. 
+// We only want to call sync once after all systems have been created.
 // Calling sync every time after we create a system causes errors.
 // See also https://github.com/cobbler/cobbler/issues/1570
 func sync(channel chan bool, client *cobbler.Client) {
-  // Block until we reach the time to sync
-  for {
-    if time.Now().UnixNano() > tts.UnixNano() {
-      break
-    }
-  }
+	// Block until we reach the time to sync
+	for {
+		if time.Now().UnixNano() > tts.UnixNano() {
+			break
+		}
+	}
 
-  client.Sync()
-  channel<-true
+	client.Sync()
+	channel <- true
 }
-
