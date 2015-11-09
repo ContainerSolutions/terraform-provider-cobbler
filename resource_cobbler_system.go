@@ -87,9 +87,10 @@ func resourceCobblerSystemCreate(d *schema.ResourceData, meta interface{}) error
 
 	network := d.Get("network").(map[string]interface{})
 	sysConfig := cobbler.SystemConfig{
-		Name:     d.Get("name").(string),
-		Profile:  d.Get("profile").(string),
-		Hostname: d.Get("hostname").(string),
+		Name:        d.Get("name").(string),
+		Profile:     d.Get("profile").(string),
+		Hostname:    d.Get("hostname").(string),
+		Nameservers: d.Get("nameservers").(string),
 		Network: cobbler.NetworkConfig{
 			Mac:     network["mac"].(string),
 			Ip:      network["ip"].(string),

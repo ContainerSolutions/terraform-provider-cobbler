@@ -9,7 +9,7 @@ resource "cobbler_system" "test01" {
   name        = "test01"
   hostname    = "deathstar"
   gateway     = "192.168.56.1"
-  nameservers = "8.8.8.8,8.8.4.4"
+  nameservers = "8.8.8.8 8.8.4.4" # List of nameservers, separated by spaces.
 
   network {
     mac     = "01:02:03:04:05:06"
