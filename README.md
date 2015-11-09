@@ -10,7 +10,7 @@ Create a `config.tf` file and then run
 ### Features
 
 - [x] Create System
-- [ ] Destroy System
+- [x] Destroy System
 - [ ] Update System
 - [ ] Add support for creating distros. It would be nice if we could just simply pass along the URL to
       the ISO file and the provider took care of the rest (downloading, mounting, importing, unmounting,
