@@ -19,3 +19,8 @@ resource "cobbler_system" "test01" {
     static  = true
   }
 }
+
+resource "cobbler_kickstart_file" "supreme" {
+  name = "supreme"
+  path = "/local/path/to/kickstart/file"
+}
