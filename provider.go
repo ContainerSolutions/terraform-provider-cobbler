@@ -49,6 +49,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"cobbler_system":         resourceCobblerSystem(),
 			"cobbler_kickstart_file": resourceCobblerKickstartFile(),
+			"cobbler_snippet":        resourceCobblerSnippet(),
 		},
 
 		ConfigureFunc: providerConfigure,

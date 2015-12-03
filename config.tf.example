@@ -25,3 +25,9 @@ resource "cobbler_kickstart_file" "supreme" {
   path    = "/local/path/to/kickstart/file"
   version = 1
 }
+
+resource "cobbler_snippet" "lesnippet" {
+  name    = "lesnippet"
+  path    = "/local/path/to/snippet/file"
+  version = 1
+}
