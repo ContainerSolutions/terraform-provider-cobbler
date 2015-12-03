@@ -26,10 +26,21 @@ func resourceCobblerKickstartFile() *schema.Resource {
 				Required:    true,
 				Description: "Local path to the kickstart file that will be created in Cobbler",
 			},
+			"version": &schema.Schema{
+				Type:        schema.TypeInt,
+				Required:    true,
+				Description: "Bumpable version for when updates to the kickstart file are needed",
+			},
 		},
 	}
 }
 
+// This function is in charge of creating and/or updating a kickstart file in Cobbler.
+// The `cobbler.KickstartFile` struct consists of two fields: the `Name` that the file will
+// have on the Cobbler server and the `Body` which must be the contents of the kickstart
+// file stored somewhere in the file directory from where terraform is ran.
+// That means that we need to open given file from within this function. If the file
+// is not found the function early returns a File Not Found kind of error.
 func resourceCobblerKickstartFileCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*cobbler.Client)
 	ok, err := client.Login()
@@ -52,9 +63,10 @@ func resourceCobblerKickstartFileCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	if ok {
+		d.SetId(ksf.Name)
 		return nil
 	} else {
-		return errors.New("could not create kickstart file")
+		return errors.New("could not create/update kickstart file")
 	}
 }
 
@@ -63,7 +75,11 @@ func resourceCobblerKickstartFileRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceCobblerKickstartFileUpdate(d *schema.ResourceData, meta interface{}) error {
-	return nil
+	if !d.HasChange("version") {
+		return nil
+	}
+
+	return resourceCobblerKickstartFileCreate(d, meta)
 }
 
 func resourceCobblerKickstartFileDelete(d *schema.ResourceData, meta interface{}) error {

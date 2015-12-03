@@ -21,6 +21,7 @@ resource "cobbler_system" "test01" {
 }
 
 resource "cobbler_kickstart_file" "supreme" {
-  name = "supreme"
-  path = "/local/path/to/kickstart/file"
+  name    = "supreme"
+  path    = "/local/path/to/kickstart/file"
+  version = 1
 }
